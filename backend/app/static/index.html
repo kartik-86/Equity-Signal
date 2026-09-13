@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Equity Signal</title>
+</head>
+<body>
+    <h1>Equity Signal — IPO Recovery Check</h1>
+
+    <input type="text" id="tickerInput" placeholder="e.g. TEMPSENS.NS">
+    <button onclick="checkStock()">Check Signal</button>
+
+    <div id="result"></div>
+
+    <script>
+        async function checkStock() {
+            const ticker = document.getElementById("tickerInput").value;
+            const response = await fetch(`http://127.0.0.1:8000/signal/${ticker}`);
+            const data = await response.json();
+
+            document.getElementById("result").innerHTML = `
+                <p><b>Ticker:</b> ${data.ticker}</p>
+                <p><b>Signal:</b> ${data.signal}</p>
+                <p><b>Reason:</b> ${data.reason}</p>
+                <p><b>Drawdown %:</b> ${data.drawdown_pct}</p>
+                <p><b>Retracement %:</b> ${data.retracement_pct}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
