@@ -2,29 +2,56 @@
 <html>
 <head>
     <title>Equity Signal</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; }
+        th { background-color: #222; color: white; }
+        .setup { background-color: #d4f7d4; font-weight: bold; }
+    </style>
 </head>
 <body>
-    <h1>Equity Signal — IPO Recovery Check</h1>
+    <h1>Equity Signal — Dashboard</h1>
+    <button onclick="loadDashboard()">Refresh Signals</button>
 
-    <input type="text" id="tickerInput" placeholder="e.g. TEMPSENS.NS">
-    <button onclick="checkStock()">Check Signal</button>
-
-    <div id="result"></div>
+    <table id="resultsTable">
+        <thead>
+            <tr>
+                <th>Ticker</th>
+                <th>Signal</th>
+                <th>Drawdown %</th>
+                <th>Retracement %</th>
+                <th>Reason</th>
+            </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+    </table>
 
     <script>
-        async function checkStock() {
-            const ticker = document.getElementById("tickerInput").value;
-            const response = await fetch(`http://127.0.0.1:8000/signal/${ticker}`);
+        async function loadDashboard() {
+            const response = await fetch("http://127.0.0.1:8000/dashboard");
             const data = await response.json();
 
-            document.getElementById("result").innerHTML = `
-                <p><b>Ticker:</b> ${data.ticker}</p>
-                <p><b>Signal:</b> ${data.signal}</p>
-                <p><b>Reason:</b> ${data.reason}</p>
-                <p><b>Drawdown %:</b> ${data.drawdown_pct}</p>
-                <p><b>Retracement %:</b> ${data.retracement_pct}</p>
-            `;
+            const tbody = document.getElementById("resultsBody");
+            tbody.innerHTML = "";
+
+            data.forEach(stock => {
+                const row = document.createElement("tr");
+                if (stock.signal === "SETUP DETECTED") {
+                    row.className = "setup";
+                }
+                row.innerHTML = `
+                    <td>${stock.ticker}</td>
+                    <td>${stock.signal || "N/A"}</td>
+                    <td>${stock.drawdown_pct ?? "-"}</td>
+                    <td>${stock.retracement_pct ?? "-"}</td>
+                    <td>${stock.reason || stock.error || "-"}</td>
+                `;
+                tbody.appendChild(row);
+            });
         }
+
+        loadDashboard();
     </script>
 </body>
 </html>

@@ -33,3 +33,20 @@ app.mount("/static", StaticFiles(directory="backend/app/static"), name="static")
 @app.get("/app")
 def serve_frontend():
     return FileResponse("backend/app/static/index.html")
+
+
+
+
+
+tracked_tickers = [
+    "TEMPSENS.NS", "HONASA.NS", "CELLO.NS", "IREDA.NS", "JIOFIN.NS",
+    "GROWW.NS", "PWL.NS", "URBANCO.NS", "ARDEE.NS", "BLEL.NS",
+    "SHANKESH.NS", "TURTLEMINT.NS", "LGEINDIA.NS", "SBIFUNDS.NS",
+    "PRIORITY.NS", "SHIPROCKET.NS", "LOTUSDEV.NS", "KUSUMGAR.NS",
+    "SAILIFE.NS", "WAAREEENER.NS", "VMM.NS"
+]
+
+
+@app.get("/dashboard")
+def get_dashboard():
+    return [check_signal(t) for t in tracked_tickers]
