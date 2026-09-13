@@ -50,3 +50,18 @@ tracked_tickers = [
 @app.get("/dashboard")
 def get_dashboard():
     return [check_signal(t) for t in tracked_tickers]
+
+
+
+
+from strategies.breakout import check_breakout
+
+
+@app.get("/breakout/{ticker}")
+def get_breakout(ticker: str):
+    return check_breakout(ticker)
+
+
+@app.get("/dashboard/breakout")
+def get_breakout_dashboard():
+    return [check_breakout(t) for t in tracked_tickers]

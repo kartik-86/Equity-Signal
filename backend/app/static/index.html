@@ -8,28 +8,48 @@
         th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; }
         th { background-color: #222; color: white; }
         .setup { background-color: #d4f7d4; font-weight: bold; }
+        .tabs { margin-top: 15px; }
+        .tab-btn { padding: 8px 16px; margin-right: 8px; cursor: pointer; border: 1px solid #333; background: #eee; }
+        .tab-btn.active { background: #333; color: white; }
     </style>
 </head>
 <body>
     <h1>Equity Signal — Dashboard</h1>
-    <button onclick="loadDashboard()">Refresh Signals</button>
+
+    <div class="tabs">
+        <button class="tab-btn active" id="tab-recovery" onclick="switchTab('recovery')">IPO Recovery</button>
+        <button class="tab-btn" id="tab-breakout" onclick="switchTab('breakout')">Breakout</button>
+    </div>
 
     <table id="resultsTable">
-        <thead>
-            <tr>
-                <th>Ticker</th>
-                <th>Signal</th>
-                <th>Drawdown %</th>
-                <th>Retracement %</th>
-                <th>Reason</th>
-            </tr>
-        </thead>
+        <thead id="tableHead"></thead>
         <tbody id="resultsBody"></tbody>
     </table>
 
     <script>
+        let currentTab = "recovery";
+
+        const headers = {
+            recovery: ["Ticker", "Signal", "Drawdown %", "Retracement %", "Reason"],
+            breakout: ["Ticker", "Signal", "Current Price", "20-Day High", "Volume Ratio", "Reason"]
+        };
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById("tab-recovery").classList.toggle("active", tab === "recovery");
+            document.getElementById("tab-breakout").classList.toggle("active", tab === "breakout");
+            loadDashboard();
+        }
+
+        function renderHeader() {
+            const thead = document.getElementById("tableHead");
+            thead.innerHTML = "<tr>" + headers[currentTab].map(h => `<th>${h}</th>`).join("") + "</tr>";
+        }
+
         async function loadDashboard() {
-            const response = await fetch("http://127.0.0.1:8000/dashboard");
+            renderHeader();
+            const endpoint = currentTab === "recovery" ? "/dashboard" : "/dashboard/breakout";
+            const response = await fetch(`http://127.0.0.1:8000${endpoint}`);
             const data = await response.json();
 
             const tbody = document.getElementById("resultsBody");
@@ -37,16 +57,27 @@
 
             data.forEach(stock => {
                 const row = document.createElement("tr");
-                if (stock.signal === "SETUP DETECTED") {
-                    row.className = "setup";
+                const isSignal = stock.signal === "SETUP DETECTED" || stock.signal === "BREAKOUT DETECTED";
+                if (isSignal) row.className = "setup";
+
+                if (currentTab === "recovery") {
+                    row.innerHTML = `
+                        <td>${stock.ticker}</td>
+                        <td>${stock.signal || "N/A"}</td>
+                        <td>${stock.drawdown_pct ?? "-"}</td>
+                        <td>${stock.retracement_pct ?? "-"}</td>
+                        <td>${stock.reason || stock.error || "-"}</td>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <td>${stock.ticker}</td>
+                        <td>${stock.signal || "N/A"}</td>
+                        <td>${stock.current_price ?? "-"}</td>
+                        <td>${stock.recent_high ?? "-"}</td>
+                        <td>${stock.volume_ratio ?? "-"}</td>
+                        <td>${stock.reason || stock.error || "-"}</td>
+                    `;
                 }
-                row.innerHTML = `
-                    <td>${stock.ticker}</td>
-                    <td>${stock.signal || "N/A"}</td>
-                    <td>${stock.drawdown_pct ?? "-"}</td>
-                    <td>${stock.retracement_pct ?? "-"}</td>
-                    <td>${stock.reason || stock.error || "-"}</td>
-                `;
                 tbody.appendChild(row);
             });
         }
