@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data files (raw data shouldn't clutter version control)
+data/*.csv
+
+# Environment/secrets
+.env
