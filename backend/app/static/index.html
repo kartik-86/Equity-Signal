@@ -19,6 +19,7 @@
     <div class="tabs">
         <button class="tab-btn active" id="tab-recovery" onclick="switchTab('recovery')">IPO Recovery</button>
         <button class="tab-btn" id="tab-breakout" onclick="switchTab('breakout')">Breakout</button>
+        <button class="tab-btn" id="tab-near" onclick="switchTab('near')">Near Breakout</button>
     </div>
 
     <table id="resultsTable">
@@ -31,13 +32,15 @@
 
         const headers = {
             recovery: ["Ticker", "Signal", "Drawdown %", "Retracement %", "Reason"],
-            breakout: ["Ticker", "Signal", "Current Price", "20-Day High", "Volume Ratio", "Reason"]
+            breakout: ["Ticker", "Signal", "Current Price", "20-Day High", "Volume Ratio", "Reason"],
+            near: ["Ticker", "Signal", "Current Price", "Recent High", "Distance %", "Reason"]
         };
 
         function switchTab(tab) {
             currentTab = tab;
             document.getElementById("tab-recovery").classList.toggle("active", tab === "recovery");
             document.getElementById("tab-breakout").classList.toggle("active", tab === "breakout");
+            document.getElementById("tab-near").classList.toggle("active", tab === "near");
             loadDashboard();
         }
 
@@ -48,7 +51,11 @@
 
         async function loadDashboard() {
             renderHeader();
-            const endpoint = currentTab === "recovery" ? "/dashboard" : "/dashboard/breakout";
+            let endpoint;
+            if (currentTab === "recovery") endpoint = "/dashboard";
+            else if (currentTab === "breakout") endpoint = "/dashboard/breakout";
+            else endpoint = "/dashboard/near-breakout";
+
             const response = await fetch(`http://127.0.0.1:8000${endpoint}`);
             const data = await response.json();
 
@@ -57,7 +64,7 @@
 
             data.forEach(stock => {
                 const row = document.createElement("tr");
-                const isSignal = stock.signal === "SETUP DETECTED" || stock.signal === "BREAKOUT DETECTED";
+                const isSignal = ["SETUP DETECTED", "BREAKOUT DETECTED", "NEAR BREAKOUT"].includes(stock.signal);
                 if (isSignal) row.className = "setup";
 
                 if (currentTab === "recovery") {
@@ -68,13 +75,22 @@
                         <td>${stock.retracement_pct ?? "-"}</td>
                         <td>${stock.reason || stock.error || "-"}</td>
                     `;
-                } else {
+                } else if (currentTab === "breakout") {
                     row.innerHTML = `
                         <td>${stock.ticker}</td>
                         <td>${stock.signal || "N/A"}</td>
                         <td>${stock.current_price ?? "-"}</td>
                         <td>${stock.recent_high ?? "-"}</td>
                         <td>${stock.volume_ratio ?? "-"}</td>
+                        <td>${stock.reason || stock.error || "-"}</td>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <td>${stock.ticker}</td>
+                        <td>${stock.signal || "N/A"}</td>
+                        <td>${stock.current_price ?? "-"}</td>
+                        <td>${stock.recent_high ?? "-"}</td>
+                        <td>${stock.distance_pct ?? "-"}</td>
                         <td>${stock.reason || stock.error || "-"}</td>
                     `;
                 }
