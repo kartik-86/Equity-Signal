@@ -1,12 +1,17 @@
 import yfinance as yf
 import pandas as pd
+from datetime import datetime
 
 
-def check_breakout(ticker, lookback_days=20, volume_multiplier=1.5, start="2015-01-01", end="2026-09-11"):
+def check_breakout(ticker, lookback_days=125, volume_multiplier=1.5, start="2015-01-01", end=None):
+    if end is None:
+        end = datetime.today().strftime("%Y-%m-%d")
+
     data = yf.download(ticker, start=start, end=end, progress=False)
     if data.empty:
         return {"ticker": ticker, "error": "No data found"}
     data.columns = data.columns.get_level_values(0)
+    data = data.dropna()
 
     if len(data) < lookback_days + 1:
         return {"ticker": ticker, "error": "Not enough data"}
@@ -41,11 +46,15 @@ def check_breakout(ticker, lookback_days=20, volume_multiplier=1.5, start="2015-
     }
 
 
-def check_near_breakout(ticker, lookback_days=20, proximity_pct=5, start="2025-01-01", end="2026-09-11"):
+def check_near_breakout(ticker, lookback_days=20, proximity_pct=5, start="2025-01-01", end=None):
+    if end is None:
+        end = datetime.today().strftime("%Y-%m-%d")
+
     data = yf.download(ticker, start=start, end=end, progress=False)
     if data.empty:
         return {"ticker": ticker, "error": "No data found"}
     data.columns = data.columns.get_level_values(0)
+    data = data.dropna()
 
     if len(data) < lookback_days + 1:
         return {"ticker": ticker, "error": "Not enough data"}

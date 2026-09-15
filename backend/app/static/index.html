@@ -56,13 +56,19 @@
             else if (currentTab === "breakout") endpoint = "/dashboard/breakout";
             else endpoint = "/dashboard/near-breakout";
 
-            const response = await fetch(`http://127.0.0.1:8000${endpoint}`);
-            const data = await response.json();
+           const response = await fetch(`http://127.0.0.1:8000${endpoint}`);
+           const data = await response.json();
+
+           const filteredData = data.filter(stock => 
+            ["SETUP DETECTED", "BREAKOUT DETECTED", "NEAR BREAKOUT"].includes(stock.signal)
+        );
+            
+            console.log(filteredData);
 
             const tbody = document.getElementById("resultsBody");
             tbody.innerHTML = "";
 
-            data.forEach(stock => {
+            filteredData.forEach(stock => { 
                 const row = document.createElement("tr");
                 const isSignal = ["SETUP DETECTED", "BREAKOUT DETECTED", "NEAR BREAKOUT"].includes(stock.signal);
                 if (isSignal) row.className = "setup";

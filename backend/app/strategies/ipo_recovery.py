@@ -1,14 +1,19 @@
 import yfinance as yf
 import pandas as pd
+from datetime import datetime
 
 
-def analyze_ipo(ticker, start="2025-01-01", end="2026-09-11", reference_days=5, min_days_after=5):
+def analyze_ipo(ticker, start="2025-01-01", end=None, reference_days=5, min_days_after=5):
+    if end is None:
+        end = datetime.today().strftime("%Y-%m-%d")
+
     try:
         data = yf.download(ticker, start=start, end=end, progress=False)
         if data.empty:
             return {"ticker": ticker, "error": "No data found"}
 
         data.columns = data.columns.get_level_values(0)
+        data = data.dropna()
 
         if len(data) < reference_days + min_days_after:
             return {"ticker": ticker, "error": "Too new — not enough post-reference data yet"}
@@ -63,11 +68,15 @@ def check_signal(ticker, min_drawdown=15, min_retracement=65, max_retracement=11
     return result
 
 
-def backtest_signal(ticker, reference_days=5, min_drawdown=15, min_retracement=65, max_retracement=110, holding_period=60, start="2025-01-01", end="2026-09-11"):
+def backtest_signal(ticker, reference_days=5, min_drawdown=15, min_retracement=65, max_retracement=110, holding_period=60, start="2025-01-01", end=None):
+    if end is None:
+        end = datetime.today().strftime("%Y-%m-%d")
+
     data = yf.download(ticker, start=start, end=end, progress=False)
     if data.empty:
         return {"ticker": ticker, "error": "No data found"}
     data.columns = data.columns.get_level_values(0)
+    data = data.dropna()
 
     if len(data) < reference_days + 1:
         return {"ticker": ticker, "error": "Not enough data"}
