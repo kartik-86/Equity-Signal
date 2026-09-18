@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 
 
-def check_breakout(ticker, lookback_days=125, volume_multiplier=1.5, start="2015-01-01", end=None):
+def check_breakout(ticker, lookback_days=35, volume_multiplier=1.5, start="2015-01-01", end=None):
     if end is None:
         end = datetime.today().strftime("%Y-%m-%d")
 

@@ -7,7 +7,7 @@ from strategies.ipo_recovery import check_signal
 from strategies.breakout import check_breakout, check_near_breakout
 from alerts.telegram_alert import send_telegram_alert
 
-tracked_tickers = [
+recovery_tickers = [
     "TEMPSENS.NS", "HONASA.NS", "CELLO.NS", "IREDA.NS", "JIOFIN.NS",
     "GROWW.NS", "PWL.NS", "URBANCO.NS", "ARDEE.NS", "BLEL.NS",
     "SHANKESH.NS", "TURTLEMINT.NS", "LGEINDIA.NS", "SBIFUNDS.NS",
@@ -15,15 +15,23 @@ tracked_tickers = [
     "SAILIFE.NS", "WAAREEENER.NS", "VMM.NS"
 ]
 
+breakout_tickers = recovery_tickers + [
+    "TATACAP.NS", "BHARATCOAL.NS", "COALINDIA.NS", "TATASTEEL.NS",
+    "ATHERENERG.NS", "VEDL.NS", "POWERGRID.NS", "IRFC.NS",
+    "BEL.NS", "SBIN.NS", "HDFCBANK.NS", "BIRET.NS",
+    "EMBASSY.NS", "TATAGOLD.NS", "KRT.BO", "ESDS.NS", "TAPARIA.BO"
+]
+
 
 def run_all_checks():
     messages = []
 
-    for ticker in tracked_tickers:
+    for ticker in recovery_tickers:
         recovery = check_signal(ticker)
         if recovery.get("signal") == "SETUP DETECTED":
             messages.append(f"🟢 *{ticker}* — IPO Recovery Setup\n{recovery['reason']}")
 
+    for ticker in breakout_tickers:
         breakout = check_breakout(ticker)
         if breakout.get("signal") == "BREAKOUT DETECTED":
             messages.append(f"🚀 *{ticker}* — Breakout Detected\n{breakout['reason']}")

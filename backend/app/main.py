@@ -11,12 +11,19 @@ from strategies.breakout import check_breakout, check_near_breakout
 
 app = FastAPI()
 
-tracked_tickers = [
+recovery_tickers = [
     "TEMPSENS.NS", "HONASA.NS", "CELLO.NS", "IREDA.NS", "JIOFIN.NS",
     "GROWW.NS", "PWL.NS", "URBANCO.NS", "ARDEE.NS", "BLEL.NS",
     "SHANKESH.NS", "TURTLEMINT.NS", "LGEINDIA.NS", "SBIFUNDS.NS",
     "PRIORITY.NS", "SHIPROCKET.NS", "LOTUSDEV.NS", "KUSUMGAR.NS",
     "SAILIFE.NS", "WAAREEENER.NS", "VMM.NS"
+]
+
+breakout_tickers = recovery_tickers + [
+    "TATACAP.NS", "BHARATCOAL.NS", "COALINDIA.NS", "TATASTEEL.NS",
+    "ATHERENERG.NS", "VEDL.NS", "POWERGRID.NS", "IRFC.NS",
+    "BEL.NS", "SBIN.NS", "HDFCBANK.NS", "BIRET.NS",
+    "EMBASSY.NS", "TATAGOLD.NS", "KRT.BO", "ESDS.NS", "TAPARIA.BO"
 ]
 
 
@@ -32,7 +39,7 @@ def get_signal(ticker: str):
 
 @app.get("/dashboard")
 def get_dashboard():
-    return [check_signal(t) for t in tracked_tickers]
+    return [check_signal(t) for t in recovery_tickers]
 
 
 @app.get("/breakout/{ticker}")
@@ -42,7 +49,7 @@ def get_breakout(ticker: str):
 
 @app.get("/dashboard/breakout")
 def get_breakout_dashboard():
-    return [check_breakout(t) for t in tracked_tickers]
+    return [check_breakout(t) for t in breakout_tickers]
 
 
 @app.get("/near-breakout/{ticker}")
@@ -52,7 +59,7 @@ def get_near_breakout(ticker: str):
 
 @app.get("/dashboard/near-breakout")
 def get_near_breakout_dashboard():
-    return [check_near_breakout(t) for t in tracked_tickers]
+    return [check_near_breakout(t) for t in breakout_tickers]
 
 
 app.mount("/static", StaticFiles(directory="backend/app/static"), name="static")
