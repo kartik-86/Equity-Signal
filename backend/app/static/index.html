@@ -1,110 +1,153 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
     <title>Equity Signal</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 30px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; }
-        th { background-color: #222; color: white; }
-        .setup { background-color: #d4f7d4; font-weight: bold; }
-        .tabs { margin-top: 15px; }
-        .tab-btn { padding: 8px 16px; margin-right: 8px; cursor: pointer; border: 1px solid #333; background: #eee; }
-        .tab-btn.active { background: #333; color: white; }
-    </style>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Equity Signal — Dashboard</h1>
+    <header class="topbar">
+        <div class="brand" onclick="showPage('home')" style="cursor:pointer;">
+            <span class="brand-mark">◆</span>
+            <div><h1>Equity Signal</h1></div>
+        </div>
+        <nav class="mainnav">
+            <a href="#" class="nav-link active" id="nav-home" onclick="showPage('home')">Home</a>
+            <a href="#" class="nav-link" id="nav-strategies" onclick="showPage('strategies')">Strategies</a>
+            <a href="#" class="nav-link" id="nav-mystocks" onclick="showPage('mystocks')">My Stocks</a>
+            <a href="#" class="nav-link" id="nav-market" onclick="showPage('market')">Market</a>
+            <a href="#" class="nav-link" id="nav-ai" onclick="showPage('ai')">AI Insights</a>
+            <a href="#" class="nav-link" id="nav-about" onclick="showPage('about')">About</a>
+        </nav>
+        <div class="topbar-right">
+            <a href="#" class="nav-link" id="nav-alerts" onclick="showPage('alerts')">Alerts</a>
+            <div class="market-status"><span class="dot"></span> Live</div>
+        </div>
+    </header>
 
-    <div class="tabs">
-        <button class="tab-btn active" id="tab-recovery" onclick="switchTab('recovery')">IPO Recovery</button>
-        <button class="tab-btn" id="tab-breakout" onclick="switchTab('breakout')">Breakout</button>
-        <button class="tab-btn" id="tab-near" onclick="switchTab('near')">Near Breakout</button>
-    </div>
+    <!-- PAGE: HOME -->
+    <section id="page-home" class="page hero-section">
+        <div class="candle-field" id="candleField"></div>
+        <div class="hero-content">
+            <h2 class="hero-headline">Every stock<br>hides a signal.</h2>
+            <p class="hero-copy">
+                Equity Signal scans Indian equities continuously, applying quantitative rules
+                to surface the setups worth your attention.
+            </p>
+            <div class="hero-actions">
+                <button class="cta-primary" onclick="showPage('strategies')">Explore strategies</button>
+                <div class="hero-stats">
+                    <span><strong>37</strong> stocks tracked</span>
+                    <span class="stat-divider"></span>
+                    <span><strong>3</strong> active strategies</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <table id="resultsTable">
-        <thead id="tableHead"></thead>
-        <tbody id="resultsBody"></tbody>
-    </table>
+    <!-- PAGE: STRATEGIES LIST -->
+    <section id="page-strategies" class="page" style="display:none;">
+        <div class="section-head">
+            <h2>Strategies</h2>
+            <p>Quantitative strategies designed to identify specific behaviors across the equity market.</p>
+        </div>
+        <div class="strategy-grid">
+            <div class="strategy-card" onclick="openStrategy('recovery')">
+                <h3>IPO Recovery</h3>
+                <p>Identifies newly listed stocks that fell from an early high and are genuinely climbing back toward it.</p>
+                <div class="strategy-meta">
+                    <span id="count-recovery">Checking matches…</span>
+                    <span class="strategy-link">Explore strategy</span>
+                </div>
+            </div>
+            <div class="strategy-card" onclick="openStrategy('breakout')">
+                <h3>Breakout</h3>
+                <p>Flags stocks making fresh highs on unusually strong volume, right now.</p>
+                <div class="strategy-meta">
+                    <span id="count-breakout">Checking matches…</span>
+                    <span class="strategy-link">Explore strategy</span>
+                </div>
+            </div>
+            <div class="strategy-card" onclick="openStrategy('near')">
+                <h3>Near Breakout</h3>
+                <p>Watchlist of stocks approaching resistance, not there yet but close.</p>
+                <div class="strategy-meta">
+                    <span id="count-near">Checking matches…</span>
+                    <span class="strategy-link">Explore strategy</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <script>
-        let currentTab = "recovery";
+    <!-- PAGE: STRATEGY DETAIL -->
+    <section id="page-strategy-detail" class="page" style="display:none;">
+        <a href="#" class="back-link" onclick="showPage('strategies')">← All strategies</a>
+        <div class="section-head">
+            <h2 id="detail-title"></h2>
+            <p id="detail-desc"></p>
+        </div>
+        <div class="stock-grid" id="stockGrid"></div>
+        <div id="detailEmptyState" class="empty-state" style="display:none;">
+            No stocks currently match this strategy.
+        </div>
+    </section>
 
-        const headers = {
-            recovery: ["Ticker", "Signal", "Drawdown %", "Retracement %", "Reason"],
-            breakout: ["Ticker", "Signal", "Current Price", "20-Day High", "Volume Ratio", "Reason"],
-            near: ["Ticker", "Signal", "Current Price", "Recent High", "Distance %", "Reason"]
-        };
+    <!-- PAGE: MY STOCKS (placeholder) -->
+    <section id="page-mystocks" class="page" style="display:none;">
+        <div class="section-head">
+            <h2>My Stocks</h2>
+            <span class="dev-tag">In development</span>
+            <p>A personal watchlist is planned here — save specific stocks and get notified only about the ones you care about, instead of scanning every strategy manually.</p>
+        </div>
+    </section>
 
-        function switchTab(tab) {
-            currentTab = tab;
-            document.getElementById("tab-recovery").classList.toggle("active", tab === "recovery");
-            document.getElementById("tab-breakout").classList.toggle("active", tab === "breakout");
-            document.getElementById("tab-near").classList.toggle("active", tab === "near");
-            loadDashboard();
-        }
+    <!-- PAGE: MARKET (placeholder) -->
+    <section id="page-market" class="page" style="display:none;">
+        <div class="section-head">
+            <h2>Market</h2>
+            <span class="dev-tag">In development</span>
+            <p>Broader market context — index levels, market breadth, sector performance — is planned for a future update, secondary to the strategy/signal functionality.</p>
+        </div>
+    </section>
 
-        function renderHeader() {
-            const thead = document.getElementById("tableHead");
-            thead.innerHTML = "<tr>" + headers[currentTab].map(h => `<th>${h}</th>`).join("") + "</tr>";
-        }
+    <!-- PAGE: AI INSIGHTS (placeholder) -->
+    <section id="page-ai" class="page" style="display:none;">
+        <div class="section-head">
+            <h2>AI Insights</h2>
+            <span class="dev-tag">In development</span>
+            <p>AI-generated explanations for each signal are planned for a later phase — after the core strategies have been properly backtested and validated, not before.</p>
+        </div>
+    </section>
 
-        async function loadDashboard() {
-            renderHeader();
-            let endpoint;
-            if (currentTab === "recovery") endpoint = "/dashboard";
-            else if (currentTab === "breakout") endpoint = "/dashboard/breakout";
-            else endpoint = "/dashboard/near-breakout";
+    <!-- PAGE: ABOUT -->
+    <section id="page-about" class="page" style="display:none;">
+        <div class="section-head">
+            <h2>About Equity Signal</h2>
+            <p>Equity market intelligence, quantitative strategies and rule-based signals for Indian equities.</p>
+        </div>
+        <div class="about-body">
+            <p>Equity Signal is a research and decision-support platform, not a stock-tip service. Every signal is generated by a defined, testable rule — not a hunch — and every rule is meant to be validated against historical data before it's trusted.</p>
+            <p>The platform currently runs two live strategies: IPO Recovery, which looks for genuine post-listing drawdown-and-recovery patterns, and Breakout / Near Breakout, which looks for stocks making fresh highs on real volume. Both are under active development and ongoing evaluation.</p>
+        </div>
+    </section>
 
-           const response = await fetch(`http://127.0.0.1:8000${endpoint}`);
-           const data = await response.json();
+    <!-- PAGE: ALERTS (placeholder) -->
+    <section id="page-alerts" class="page" style="display:none;">
+        <div class="section-head">
+            <h2>Alerts</h2>
+            <span class="dev-tag">In development</span>
+            <p>Alerts are currently delivered directly to Telegram when a strategy detects a new setup. A dedicated in-app alert history will live here in a future update.</p>
+        </div>
+    </section>
 
-           const filteredData = data.filter(stock => 
-            ["SETUP DETECTED", "BREAKOUT DETECTED", "NEAR BREAKOUT"].includes(stock.signal)
-        );
-            
-            console.log(filteredData);
+    <footer>
+        Equity Signal is a research and decision-support tool. Signals are not investment advice.
+    </footer>
 
-            const tbody = document.getElementById("resultsBody");
-            tbody.innerHTML = "";
-
-            filteredData.forEach(stock => { 
-                const row = document.createElement("tr");
-                const isSignal = ["SETUP DETECTED", "BREAKOUT DETECTED", "NEAR BREAKOUT"].includes(stock.signal);
-                if (isSignal) row.className = "setup";
-
-                if (currentTab === "recovery") {
-                    row.innerHTML = `
-                        <td>${stock.ticker}</td>
-                        <td>${stock.signal || "N/A"}</td>
-                        <td>${stock.drawdown_pct ?? "-"}</td>
-                        <td>${stock.retracement_pct ?? "-"}</td>
-                        <td>${stock.reason || stock.error || "-"}</td>
-                    `;
-                } else if (currentTab === "breakout") {
-                    row.innerHTML = `
-                        <td>${stock.ticker}</td>
-                        <td>${stock.signal || "N/A"}</td>
-                        <td>${stock.current_price ?? "-"}</td>
-                        <td>${stock.recent_high ?? "-"}</td>
-                        <td>${stock.volume_ratio ?? "-"}</td>
-                        <td>${stock.reason || stock.error || "-"}</td>
-                    `;
-                } else {
-                    row.innerHTML = `
-                        <td>${stock.ticker}</td>
-                        <td>${stock.signal || "N/A"}</td>
-                        <td>${stock.current_price ?? "-"}</td>
-                        <td>${stock.recent_high ?? "-"}</td>
-                        <td>${stock.distance_pct ?? "-"}</td>
-                        <td>${stock.reason || stock.error || "-"}</td>
-                    `;
-                }
-                tbody.appendChild(row);
-            });
-        }
-
-        loadDashboard();
-    </script>
+    <script src="/static/dashboard.js"></script>
 </body>
 </html>
