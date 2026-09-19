@@ -79,6 +79,11 @@ def get_stock_overview(ticker: str):
         "fundamentals": fundamental_score(ticker),
     }
 
+@app.get("/tickers/all")
+def get_all_tickers():
+    combined = sorted(set(recovery_tickers) | set(breakout_tickers))
+    return {"tickers": combined}
+
 
 @app.get("/app")
 def serve_frontend():

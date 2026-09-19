@@ -481,3 +481,16 @@ footer {
 @media (max-width: 800px) {
     .strategy-grid { grid-template-columns: 1fr; }
 }
+
+.stock-name {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+}
+
+.stock-ticker-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    margin-top: 2px;
+}

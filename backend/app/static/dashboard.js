@@ -1,3 +1,48 @@
+const tickerNames = {
+    "TEMPSENS.NS": "Tempsens Instruments",
+    "HONASA.NS": "Honasa Consumer",
+    "CELLO.NS": "Cello World",
+    "IREDA.NS": "IREDA",
+    "JIOFIN.NS": "Jio Financial Services",
+    "GROWW.NS": "Groww",
+    "PWL.NS": "Physics Wallah",
+    "URBANCO.NS": "Urban Company",
+    "ARDEE.NS": "Ardee Engineering",
+    "BLEL.NS": "Behari Lal Engineering",
+    "SHANKESH.NS": "Shankesh Jewellers",
+    "TURTLEMINT.NS": "Turtlemint",
+    "LGEINDIA.NS": "LG Electronics India",
+    "SBIFUNDS.NS": "SBI Funds Management",
+    "PRIORITY.NS": "Priority Jewels",
+    "SHIPROCKET.NS": "Shiprocket",
+    "LOTUSDEV.NS": "Sri Lotus Developers",
+    "KUSUMGAR.NS": "Kusumgar Corporates",
+    "SAILIFE.NS": "Sai Life Sciences",
+    "WAAREEENER.NS": "Waaree Energies",
+    "VMM.NS": "Vishal Mega Mart",
+    "TATACAP.NS": "Tata Capital",
+    "BHARATCOAL.NS": "Bharat Coking Coal",
+    "COALINDIA.NS": "Coal India",
+    "TATASTEEL.NS": "Tata Steel",
+    "ATHERENERG.NS": "Ather Energy",
+    "VEDL.NS": "Vedanta",
+    "POWERGRID.NS": "Power Grid Corporation",
+    "IRFC.NS": "IRFC",
+    "BEL.NS": "Bharat Electronics",
+    "SBIN.NS": "State Bank of India",
+    "HDFCBANK.NS": "HDFC Bank",
+    "BIRET.NS": "Brookfield India REIT",
+    "EMBASSY.NS": "Embassy Office Parks REIT",
+    "TATAGOLD.NS": "Tata Gold ETF",
+    "KRT.BO": "Knowledge Realty Trust",
+    "ESDS.NS": "ESDS Software Solutions",
+    "TAPARIA.BO": "Taparia Tools"
+};
+
+function displayName(ticker) {
+    return tickerNames[ticker] || ticker;
+}
+
 function buildCandleField() {
     const field = document.getElementById("candleField");
     if (!field) return;
@@ -54,7 +99,7 @@ const strategiesMeta = {
     }
 };
 
-const allPages = ["home", "strategies", "strategy-detail", "mystocks", "market", "ai", "about", "alerts"];
+const allPages = ["home", "strategies", "strategy-detail", "mystocks", "ai", "about", "alerts"];
 
 function showPage(page) {
     allPages.forEach(p => {
@@ -65,7 +110,6 @@ function showPage(page) {
     document.getElementById("nav-home").classList.toggle("active", page === "home");
     document.getElementById("nav-strategies").classList.toggle("active", page === "strategies" || page === "strategy-detail");
     document.getElementById("nav-mystocks").classList.toggle("active", page === "mystocks");
-    document.getElementById("nav-market").classList.toggle("active", page === "market");
     document.getElementById("nav-ai").classList.toggle("active", page === "ai");
     document.getElementById("nav-about").classList.toggle("active", page === "about");
     document.getElementById("nav-alerts").classList.toggle("active", page === "alerts");
@@ -123,10 +167,13 @@ function renderStockCard(stock, key) {
 
     const fundId = `fund-${stock.ticker.replace(".", "-")}`;
 
-        return `
+    return `
         <div class="stock-card">
             <div class="stock-card-head">
-                <span class="stock-ticker">${stock.ticker}</span>
+                <div>
+                    <div class="stock-name">${displayName(stock.ticker)}</div>
+                    <div class="stock-ticker-sub">${stock.ticker}</div>
+                </div>
                 ${signalBadge(stock.signal)}
             </div>
             <button class="watchlist-btn" onclick="addToWatchlist('${stock.ticker}')">+ Watchlist</button>
@@ -208,7 +255,7 @@ async function addManualTicker() {
     loadMyStocks();
 }
 
-function renderWatchlistCard(overview) {
+function renderWatchlistCard(overview, isBase) {
     const { ticker, recovery, breakout, near_breakout, fundamentals } = overview;
 
     const signals = [];
@@ -221,11 +268,16 @@ function renderWatchlistCard(overview) {
         ? `${fundamentals.fundamental_score}/100`
         : "N/A";
 
+    const removeBtn = isBase ? "" : `<button class="remove-btn" onclick="removeFromWatchlist('${ticker}')">Remove</button>`;
+
     return `
         <div class="stock-card">
             <div class="stock-card-head">
-                <span class="stock-ticker">${ticker}</span>
-                <button class="remove-btn" onclick="removeFromWatchlist('${ticker}')">Remove</button>
+                <div>
+                    <div class="stock-name">${displayName(ticker)}</div>
+                    <div class="stock-ticker-sub">${ticker}</div>
+                </div>
+                ${removeBtn}
             </div>
             <div class="stock-metric"><span>Signals</span><span>${signalHtml}</span></div>
             <div class="stock-metric"><span>Fundamental score</span><strong>${fundScore}</strong></div>
@@ -233,23 +285,32 @@ function renderWatchlistCard(overview) {
     `;
 }
 
+let baseTickers = [];
+
 async function loadMyStocks() {
-    const list = getWatchlist();
     const grid = document.getElementById("watchlistGrid");
     const empty = document.getElementById("watchlistEmptyState");
 
-    if (list.length === 0) {
+    if (baseTickers.length === 0) {
+        const res = await fetch("http://127.0.0.1:8000/tickers/all");
+        const data = await res.json();
+        baseTickers = data.tickers;
+    }
+
+    const extra = getWatchlist().filter(t => !baseTickers.includes(t));
+    const fullList = [...baseTickers, ...extra];
+
+    if (fullList.length === 0) {
         grid.innerHTML = "";
         empty.style.display = "block";
         return;
     }
     empty.style.display = "none";
-    grid.innerHTML = list.map(() => `<div class="stock-card">Loading…</div>`).join("");
+    grid.innerHTML = fullList.map(() => `<div class="stock-card">Loading…</div>`).join("");
 
     const overviews = await Promise.all(
-        list.map(t => fetch(`http://127.0.0.1:8000/stock/${t}`).then(r => r.json()))
+        fullList.map(t => fetch(`http://127.0.0.1:8000/stock/${t}`).then(r => r.json()))
     );
 
-    grid.innerHTML = overviews.map(renderWatchlistCard).join("");
+    grid.innerHTML = overviews.map(o => renderWatchlistCard(o, baseTickers.includes(o.ticker))).join("");
 }
-
