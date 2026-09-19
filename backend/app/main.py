@@ -8,6 +8,7 @@ sys.path.append(os.path.dirname(__file__))
 
 from strategies.ipo_recovery import check_signal
 from strategies.breakout import check_breakout, check_near_breakout
+from strategies.fundamentals import fundamental_score
 
 app = FastAPI()
 
@@ -63,6 +64,20 @@ def get_near_breakout_dashboard():
 
 
 app.mount("/static", StaticFiles(directory="backend/app/static"), name="static")
+
+@app.get("/fundamentals/{ticker}")
+def get_fundamentals(ticker: str):
+    return fundamental_score(ticker)
+
+@app.get("/stock/{ticker}")
+def get_stock_overview(ticker: str):
+    return {
+        "ticker": ticker,
+        "recovery": check_signal(ticker),
+        "breakout": check_breakout(ticker),
+        "near_breakout": check_near_breakout(ticker),
+        "fundamentals": fundamental_score(ticker),
+    }
 
 
 @app.get("/app")

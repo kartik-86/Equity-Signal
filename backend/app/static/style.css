@@ -435,6 +435,49 @@ footer {
     line-height: 1.5;
 }
 
+.score-good { color: var(--positive); }
+.score-weak { color: var(--warning); }
+
+.watchlist-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+
+.watchlist-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--negative);
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.watchlist-add {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.watchlist-add input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    width: 220px;
+}
+
 @media (max-width: 800px) {
     .strategy-grid { grid-template-columns: 1fr; }
 }
