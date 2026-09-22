@@ -125,7 +125,7 @@ function showPage(page) {
 async function loadStrategiesOverview() {
     for (const key of Object.keys(strategiesMeta)) {
         const meta = strategiesMeta[key];
-        const response = await fetch(`http://127.0.0.1:8000${meta.endpoint}`);
+        const response = await fetch(meta.endpoint);
         const data = await response.json();
         const matches = data.filter(s => s.signal === meta.signal).length;
         document.getElementById(`count-${key}`).textContent =
@@ -191,7 +191,7 @@ async function openStrategy(key) {
     document.getElementById("detail-title").textContent = meta.title;
     document.getElementById("detail-desc").textContent = meta.desc;
 
-    const response = await fetch(`http://127.0.0.1:8000${meta.endpoint}`);
+    const response = await fetch(meta.endpoint);
     const data = await response.json();
     const matches = data.filter(s => s.signal === meta.signal);
 
@@ -208,7 +208,7 @@ async function openStrategy(key) {
     grid.innerHTML = matches.map(stock => renderStockCard(stock, key)).join("");
 
     matches.forEach(async (stock) => {
-        const fundResponse = await fetch(`http://127.0.0.1:8000/fundamentals/${stock.ticker}`);
+        const fundResponse = await fetch(`/fundamentals/${stock.ticker}`);
         const fund = await fundResponse.json();
         const el = document.getElementById(`fund-${stock.ticker.replace(".", "-")}`);
         if (el && fund.fundamental_score !== undefined) {
@@ -292,7 +292,7 @@ async function loadMyStocks() {
     const empty = document.getElementById("watchlistEmptyState");
 
     if (baseTickers.length === 0) {
-        const res = await fetch("http://127.0.0.1:8000/tickers/all");
+        const res = await fetch("/tickers/all");
         const data = await res.json();
         baseTickers = data.tickers;
     }
@@ -309,7 +309,7 @@ async function loadMyStocks() {
     grid.innerHTML = fullList.map(() => `<div class="stock-card">Loading…</div>`).join("");
 
     const overviews = await Promise.all(
-        fullList.map(t => fetch(`http://127.0.0.1:8000/stock/${t}`).then(r => r.json()))
+        fullList.map(t => fetch(`/stock/${t}`).then(r => r.json()))
     );
 
     grid.innerHTML = overviews.map(o => renderWatchlistCard(o, baseTickers.includes(o.ticker))).join("");
