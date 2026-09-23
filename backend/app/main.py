@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 import sys
 import os
 
@@ -30,7 +30,7 @@ breakout_tickers = recovery_tickers + [
 
 @app.get("/")
 def home():
-    return {"message": "Equity Signal API is running"}
+    return RedirectResponse(url="/app")
 
 
 @app.get("/signal/{ticker}")
